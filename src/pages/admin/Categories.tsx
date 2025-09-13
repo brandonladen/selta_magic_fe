@@ -66,7 +66,7 @@ export default function AdminCategories() {
       const token = localStorage.getItem('auth_token');
       console.log('Fetching categories with token:', token ? 'present' : 'missing');
       
-      const response = await fetch(`${API_BASE_URL}/api/admin/categories`, {
+      const response = await fetch(`${API_BASE_URL}/admin/categories`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -109,7 +109,7 @@ export default function AdminCategories() {
       if (editingCategory) {
         // Update existing category
         console.log('Updating category:', editingCategory.id, 'with data:', categoryData);
-        response = await fetch(`${API_BASE_URL}/api/admin/categories/${editingCategory.id}`, {
+        response = await fetch(`${API_BASE_URL}/admin/categories/${editingCategory.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ export default function AdminCategories() {
       } else {
         // Create new category
         console.log('Creating new category with data:', categoryData);
-        response = await fetch(`${API_BASE_URL}/api/admin/categories`, {
+        response = await fetch(`${API_BASE_URL}/admin/categories`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ export default function AdminCategories() {
       setLoading(true);
       console.log('Deleting category with ID:', categoryId);
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${API_BASE_URL}/api/admin/categories/${categoryId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/categories/${categoryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
