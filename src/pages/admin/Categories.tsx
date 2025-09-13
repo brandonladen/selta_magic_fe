@@ -208,7 +208,7 @@ export default function AdminCategories() {
   return (
     <AdminLayout title="Category Management">
       <Helmet>
-        <title>Admin Categories - Dazzling Dove Commerce</title>
+        <title>Admin Categories -  Selta Magic </title>
       </Helmet>
       
       <div className="space-y-6">

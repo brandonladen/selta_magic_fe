@@ -100,7 +100,7 @@ const Orders = () => {
   return (
     <div className="container mx-auto py-8 px-4 min-h-screen">
       <Helmet>
-        <title>My Orders - Dazzling Dove Commerce</title>
+        <title>My Orders - Selta Magic  </title>
       </Helmet>
 
       {selectedOrder ? (

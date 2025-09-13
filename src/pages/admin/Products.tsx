@@ -271,7 +271,7 @@ export default function AdminProducts() {
   return (
     <AdminLayout title="Product Management">
       <Helmet>
-        <title>Admin Products - Dazzling Dove Commerce</title>
+        <title>Admin Products -  Selta Magic </title>
       </Helmet>
       
       <div className="space-y-6">
