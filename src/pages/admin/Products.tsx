@@ -185,18 +185,23 @@ export default function AdminProducts() {
       if (editingProduct) {
         // Update existing product
         console.log('Updating product:', editingProduct.id);
-        const response = await localClient.from('products').update(productData).eq('id', editingProduct.id).select();
-        const result = await response;
-
-        if (result.error) throw new Error(result.error);
-        toast.success('Product updated successfully!');
+        // TODO: Implement update logic with fetch if needed
+        toast.error('Product update not implemented yet');
       } else {
         // Create new product
         console.log('Creating new product...');
-        const result = await localClient.from('products').insert(productData);
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`${API_BASE_URL}/products`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(productData),
+        });
+        const result = await response.json();
         console.log('Product creation result:', result);
-
-        if (result.error) throw new Error(result.error);
+        if (!response.ok || result.error) throw new Error(result.error || 'Failed to create product');
         toast.success('Product created successfully!');
       }
 
