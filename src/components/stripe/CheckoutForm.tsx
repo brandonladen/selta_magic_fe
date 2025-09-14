@@ -20,6 +20,7 @@ export default function CheckoutForm({ amount, cartItems, shippingAddress, onSuc
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [formDisabled, setFormDisabled] = useState(false);
   const { toast } = useToast();
 
   // Create payment intent on component mount
@@ -86,7 +87,8 @@ export default function CheckoutForm({ amount, cartItems, shippingAddress, onSuc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    if (formDisabled) return;
+
     if (!stripe || !elements || !clientSecret) {
       toast({
         title: "Error",
@@ -120,6 +122,7 @@ export default function CheckoutForm({ amount, cartItems, shippingAddress, onSuc
       }
 
       if (paymentIntent.status === 'succeeded') {
+        setFormDisabled(true); // Disable form after success
         // Confirm payment on server and create order
         const token = localStorage.getItem('auth_token');
         const response = await fetch(`${API_BASE_URL}/stripe/confirm-payment`, {
@@ -201,12 +204,12 @@ export default function CheckoutForm({ amount, cartItems, shippingAddress, onSuc
                 },
               },
             }}
+            disabled={formDisabled}
           />
         </div>
-        
         <Button 
           type="submit" 
-          disabled={!stripe || isLoading} 
+          disabled={!stripe || isLoading || formDisabled} 
           className="w-full bg-selta-gold text-selta-deep-purple hover:bg-selta-gold/90 font-bold py-3"
         >
           {isLoading ? (
@@ -218,7 +221,6 @@ export default function CheckoutForm({ amount, cartItems, shippingAddress, onSuc
             `Pay $${amount.toFixed(2)}`
           )}
         </Button>
-        
         <p className="text-xs text-gray-500 text-center">
           Your payment is secured by Stripe. Your card information is never stored on our servers.
         </p>

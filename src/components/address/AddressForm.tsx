@@ -59,7 +59,7 @@ export default function AddressForm({ onAddressAdded, onCancel, type = 'shipping
     phone: '',
     address: '',
     additional_info: '',
-    country: 'Kenya',
+    country: 'United States', // Default to US
     county: '',
     region: '',
     is_default: true
@@ -224,7 +224,7 @@ export default function AddressForm({ onAddressAdded, onCancel, type = 'shipping
             </Select>
           </div>
 
-          {formData.country === 'US' && (
+          {formData.country === 'United States' && (
             <div>
               <Label htmlFor="region">State</Label>
               <Select
