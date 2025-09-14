@@ -12,7 +12,7 @@ type Product = {
   id: string;
   name: string;
   description: string;
-  price: string; // PostgreSQL DECIMAL comes as string
+  price: string;
   category: string;
   brand: string;
   image: string;
@@ -74,7 +74,7 @@ export default function Products() {
   const brands = Array.from(new Set(
     products
       .map(p => p.brand)
-      .filter(brand => brand && brand.trim() !== '') // Filter out null/undefined/empty brands
+      .filter(brand => brand && brand.trim() !== '')
   )).sort(); // Sort alphabetically
   
   console.log('All products:', products);
@@ -82,12 +82,6 @@ export default function Products() {
   
   // Apply filters and sorting
   useEffect(() => {
-    console.log('=== APPLYING FILTERS ===');
-    console.log('Selected categories:', selectedCategories);
-    console.log('Selected brands:', selectedBrands);
-    console.log('Selected price ranges:', priceRanges);
-    console.log('Sort by:', sortBy);
-    console.log('Total products:', products.length);
     
     let result = [...products];
     

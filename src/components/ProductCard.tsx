@@ -66,7 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                   product.image.startsWith('http')
                     ? product.image
                     : product.image.startsWith('/uploads')
-                      ? `${window.location.origin}${product.image}`
+                      ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}${product.image}`
                       : '/placeholder.svg'
                 }
                 alt={product.name}
