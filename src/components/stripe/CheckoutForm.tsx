@@ -138,13 +138,13 @@ export default function CheckoutForm({ amount, cartItems, shippingAddress, onSuc
         }
 
         const { orderId } = await response.json();
-        
         toast({
           title: "Payment successful!",
           description: `Your payment of $${amount.toFixed(2)} has been processed successfully.`,
         });
-        
-        onSuccess(orderId);
+        setClientSecret(null); // Prevent resubmission with same PaymentIntent
+        onSuccess(orderId); // Redirect or show success
+        return;
       }
     } catch (error: any) {
       console.error('Payment error:', error);

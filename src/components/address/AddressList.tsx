@@ -122,9 +122,28 @@ export default function AddressList({ onAddressSelected, selectMode = false, typ
     return parts.join(', ');
   };
 
-  const handleAddressAdded = () => {
+  const handleAddressAdded = async () => {
     setShowAddForm(false);
-    loadAddresses();
+    await loadAddresses();
+    // After adding, select the new default address and proceed
+    if (onAddressSelected) {
+      // Find the default address of the current type
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const response = await fetch(`${API_BASE_URL}/addresses`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          let addressData = result.data || [];
+          if (type) {
+            addressData = addressData.filter((addr) => addr.type === type);
+          }
+          const defaultAddr = addressData.find((addr) => addr.is_default) || addressData[0];
+          if (defaultAddr) onAddressSelected(defaultAddr);
+        }
+      }
+    }
   };
 
   if (loading) {

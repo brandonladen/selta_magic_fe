@@ -178,7 +178,13 @@ export default function Cart() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div className="w-full sm:w-24 h-24">
                         <img
-                          src={item.image}
+                          src={
+                            item.image?.startsWith('http')
+                              ? item.image
+                              : item.image?.startsWith('/uploads')
+                                ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}${item.image}`
+                                : '/placeholder.svg'
+                          }
                           alt={item.name}
                           className="w-full h-full object-cover rounded-md"
                         />

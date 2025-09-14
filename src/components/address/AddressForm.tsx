@@ -48,15 +48,6 @@ const US_STATES = [
   'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
 ];
 
-const KENYA_COUNTIES = [
-  'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa', 'Homa Bay',
-  'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi', 'Kirinyaga', 'Kisii',
-  'Kisumu', 'Kitui', 'Kwale', 'Laikipia', 'Lamu', 'Machakos', 'Makueni', 'Mandera',
-  'Marsabit', 'Meru', 'Migori', 'Mombasa', 'Murang\'a', 'Nairobi', 'Nakuru', 'Nandi',
-  'Narok', 'Nyamira', 'Nyandarua', 'Nyeri', 'Samburu', 'Siaya', 'Taita-Taveta', 'Tana River',
-  'Tharaka-Nithi', 'Trans Nzoia', 'Turkana', 'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'
-];
-
 export default function AddressForm({ onAddressAdded, onCancel, type = 'shipping' }: AddressFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -233,33 +224,26 @@ export default function AddressForm({ onAddressAdded, onCancel, type = 'shipping
             </Select>
           </div>
 
-          {formData.country === 'Kenya' && (
+          {formData.country === 'US' && (
             <div>
-              <Label htmlFor="county">County *</Label>
-              <Select value={formData.county} onValueChange={(value) => handleInputChange('county', value)}>
+              <Label htmlFor="region">State</Label>
+              <Select
+                value={formData.region}
+                onValueChange={(value) => handleInputChange('region', value)}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select county" />
+                  <SelectValue placeholder="Select state" />
                 </SelectTrigger>
                 <SelectContent className="h-60">
-                  {KENYA_COUNTIES.map((county) => (
-                    <SelectItem key={county} value={county}>
-                      {county}
+                  {US_STATES.map((state) => (
+                    <SelectItem key={state} value={state}>
+                      {state}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           )}
-
-          <div>
-            <Label htmlFor="region">Region</Label>
-            <Input
-              id="region"
-              value={formData.region}
-              onChange={(e) => handleInputChange('region', e.target.value)}
-              placeholder="Enter region/area"
-            />
-          </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
