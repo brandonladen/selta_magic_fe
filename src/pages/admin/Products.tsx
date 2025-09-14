@@ -126,7 +126,8 @@ export default function AdminProducts() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     console.log('Starting product submission...');
     console.log('Auth token from localStorage (auth_token):', localStorage.getItem('auth_token'));
     console.log('Auth token from localStorage (token):', localStorage.getItem('token'));
