@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
+import { resolveImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
 
 // Product type that matches our database schema
 type Product = {
@@ -195,21 +196,10 @@ export default function ProductDetails() {
               {/* Product Image */}
               <div className="flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
                 <img 
-                  src={
-                    product.image && product.image.trim() !== ''
-                      ? product.image.startsWith('http')
-                        ? product.image
-                        : product.image.startsWith('/uploads')
-                          ? `${API_BASE_URL.replace('/api', '')}${product.image}`
-                          : product.image
-                      : '/placeholder.svg'
-                  }
+                  src={resolveImageUrl(product.image)}
                   alt={product.name} 
                   className="w-full max-w-md object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder.svg';
-                  }}
+                  onError={createImageErrorHandler()}
                 />
               </div>
               

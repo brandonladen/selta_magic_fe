@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
+import { resolveImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
 
 // Product type that matches our database schema
 type Product = {
@@ -28,8 +29,6 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
-  // Use environment variable for API base URL
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
   
   const handleAddToCart = async () => {
     try {
@@ -60,32 +59,13 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <Link to={`/products/${product.id}`} className="block">
           <div className="aspect-square overflow-hidden bg-gray-100 flex items-center justify-center">
-            {product.image && product.image.trim() !== '' ? (
-              <img
-                src={
-                  product.image.startsWith('http')
-                    ? product.image
-                    : product.image.startsWith('/uploads')
-                      ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}${product.image}`
-                      : '/placeholder.svg'
-                }
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-                onError={(e) => {
-                  // Fallback to placeholder if image fails to load
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.svg';
-                }}
-              />
-            ) : (
-              <img
-                src="/placeholder.svg"
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-              />
-            )}
+            <img
+              src={resolveImageUrl(product.image)}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+              onError={createImageErrorHandler()}
+            />
           </div>
         </Link>
         

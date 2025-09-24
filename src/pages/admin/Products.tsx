@@ -22,6 +22,7 @@ import { localClient } from '@/lib/localClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Upload, Edit, Trash2, ImageIcon } from 'lucide-react';
 import { uploadImageToLocal, validateImageFile } from '@/api/imageUpload';
+import { resolveImageUrl, createImageErrorHandler } from '@/utils/imageUtils';
 
 // Product type
 type Product = {
@@ -493,21 +494,10 @@ export default function AdminProducts() {
                           <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                             {product.image ? (
                               <img
-                                src={
-                                  product.image.startsWith('http')
-                                    ? product.image
-                                    : product.image.startsWith('/uploads')
-                                      ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}${product.image}`
-                                      : '/placeholder.svg'
-                                }
+                                src={resolveImageUrl(product.image)}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  // Fallback to placeholder if image fails to load
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  target.parentElement!.innerHTML = '<div class="w-6 h-6 text-gray-400"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
-                                }}
+                                onError={createImageErrorHandler()}
                               />
                             ) : (
                               <ImageIcon className="w-6 h-6 text-gray-400" />

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { FeaturedProduct } from "./types";
+import { resolveImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
 
 interface ProductCardProps {
   product: FeaturedProduct;
@@ -50,10 +51,11 @@ export default function ProductCard({ product, variants }: ProductCardProps) {
           className="aspect-square overflow-hidden block cursor-pointer"
         >
           <img
-            src={product.image}
+            src={resolveImageUrl(product.image)}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
+            onError={createImageErrorHandler()}
           />
         </div>
         
