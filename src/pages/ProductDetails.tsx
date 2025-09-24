@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart, Star, ArrowLeft, Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,25 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/useCart";
-import { getProductById } from "@/data/products";
+import { toast } from "sonner";
+
+// Product type that matches our database schema
+type Product = {
+  id: string;
+  name: string;
+  description: string;
+  price: string; // PostgreSQL DECIMAL comes as string
+  category: string;
+  brand: string;
+  image: string;
+  original_price?: string;
+  rating?: string;
+  reviews?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function ProductDetails() {
   const { productId } = useParams<{ productId: string }>();
@@ -16,8 +34,31 @@ export default function ProductDetails() {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  
-  const product = getProductById(productId || "");
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch product from API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!productId) return;
+      
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/products/${productId}`);
+        const result = await response.json();
+
+        if (result.error) throw new Error(result.error);
+        setProduct(result.data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        toast.error('Failed to fetch product details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [productId]);
   
   // Enhanced error handling for missing products
   if (!productId) {
@@ -45,6 +86,22 @@ export default function ProductDetails() {
     );
   }
   
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-selta-deep-purple mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-selta-deep-purple mb-2">
+              Loading product details...
+            </h3>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -138,9 +195,21 @@ export default function ProductDetails() {
               {/* Product Image */}
               <div className="flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
                 <img 
-                  src={product.image} 
+                  src={
+                    product.image && product.image.trim() !== ''
+                      ? product.image.startsWith('http')
+                        ? product.image
+                        : product.image.startsWith('/uploads')
+                          ? `${API_BASE_URL.replace('/api', '')}${product.image}`
+                          : product.image
+                      : '/placeholder.svg'
+                  }
                   alt={product.name} 
                   className="w-full max-w-md object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
               </div>
               
@@ -148,22 +217,24 @@ export default function ProductDetails() {
               <div>
                 <h1 className="text-3xl font-bold text-selta-deep-purple mb-2">{product.name}</h1>
                 
-                <div className="flex items-center mb-4">
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={18} className={i < Math.floor(product.rating) ? "text-selta-gold fill-selta-gold" : "text-gray-300"} />
-                    ))}
+                {product.rating && (
+                  <div className="flex items-center mb-4">
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={18} className={i < Math.floor(parseFloat(product.rating!)) ? "text-selta-gold fill-selta-gold" : "text-gray-300"} />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-700 ml-2">
+                      {parseFloat(product.rating).toFixed(1)} ({product.reviews || 0} reviews)
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-700 ml-2">
-                    {product.rating} ({product.reviews} reviews)
-                  </span>
-                </div>
+                )}
                 
                 <div className="flex items-center mb-6">
-                  <span className="text-2xl font-bold text-selta-gold">${product.price.toFixed(2)}</span>
-                  {product.original_price && (
+                  <span className="text-2xl font-bold text-selta-gold">${parseFloat(product.price).toFixed(2)}</span>
+                  {product.original_price && parseFloat(product.original_price) > parseFloat(product.price) && (
                     <span className="ml-3 text-gray-500 line-through">
-                      ${product.original_price.toFixed(2)}
+                      ${parseFloat(product.original_price).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -186,26 +257,16 @@ export default function ProductDetails() {
                       size="icon"
                       variant="ghost"
                       className="h-10 w-10 rounded-l-none"
-                      onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
-                      disabled={quantity >= product.stock_quantity}
+                      onClick={() => setQuantity(quantity + 1)}
                     >
                       +
                     </Button>
                   </div>
                   
                   <div className="flex items-center">
-                    <span className={`text-sm ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {product.stock_quantity > 0 ? (
-                        <>
-                          <Check className="h-4 w-4 inline mr-1" />
-                          In Stock ({product.stock_quantity} available)
-                        </>
-                      ) : (
-                        <>
-                          <Info className="h-4 w-4 inline mr-1" />
-                          Out of Stock
-                        </>
-                      )}
+                    <span className="text-sm text-green-600">
+                      <Check className="h-4 w-4 inline mr-1" />
+                      In Stock
                     </span>
                   </div>
                 </div>
@@ -214,7 +275,7 @@ export default function ProductDetails() {
                   <Button 
                     className="flex-1 bg-selta-deep-purple hover:bg-selta-deep-purple/90 text-white"
                     onClick={handleAddToCart}
-                    disabled={product.stock_quantity === 0 || isLoading}
+                    disabled={isLoading}
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
                     {isLoading ? 'Adding...' : 'Add to Cart'}
@@ -222,7 +283,7 @@ export default function ProductDetails() {
                   <Button 
                     className="flex-1 bg-selta-gold text-selta-deep-purple hover:bg-selta-gold/90 font-semibold"
                     onClick={handleBuyNow}
-                    disabled={product.stock_quantity === 0 || isLoading}
+                    disabled={isLoading}
                   >
                     Buy Now
                   </Button>
