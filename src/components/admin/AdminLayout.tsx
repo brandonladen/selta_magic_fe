@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, Users, MapPin, MessageCircle, FolderTree } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Users, MapPin, MessageCircle, FolderTree, Images } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Logo from "@/components/shared/Logo";
@@ -50,6 +50,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     { path: "/admin", label: "Dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
     { path: "/admin/products", label: "Products", icon: <ShoppingBag className="h-5 w-5" /> },
     { path: "/admin/categories", label: "Categories", icon: <FolderTree className="h-5 w-5" /> },
+    { path: "/admin/carousel", label: "Carousel", icon: <Images className="h-5 w-5" /> },
     { path: "/admin/users", label: "Users", icon: <Users className="h-5 w-5" /> },
     { path: "/admin/delivery", label: "Delivery", icon: <MapPin className="h-5 w-5" /> },
     { path: "/admin/chats", label: "Customer Chats", icon: <MessageCircle className="h-5 w-5" /> },

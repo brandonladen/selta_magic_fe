@@ -102,35 +102,71 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       console.log('Adding to cart:', { product, quantity, user: user?.id });
       setLoading(true);
       
+      // Validate product data
+      if (!product || !product.id) {
+        throw new Error('Invalid product data. Product information is missing.');
+      }
+      
+      if (!product.name || !product.price) {
+        throw new Error('Product information is incomplete. Please try refreshing the page.');
+      }
+      
+      if (quantity <= 0) {
+        throw new Error('Invalid quantity. Please select a valid quantity.');
+      }
+      
       if (user) {
         // Add to database for logged-in users
         const token = localStorage.getItem('auth_token');
-        if (token) {
-          const response = await fetch(`${API_BASE_URL}/cart`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              product_id: product.id,
-              quantity: quantity
-            }),
-          });
-          
-          if (response.ok) {
-            const result = await response.json();
-            console.log('Item added to database cart:', result);
-            // Reload cart from database
-            await loadCart();
-          } else {
-            const error = await response.json();
-            console.error('Failed to add to database cart:', error);
-            throw new Error(error.error || 'Failed to add to cart');
-          }
-        } else {
-          throw new Error('Authentication required');
+        if (!token) {
+          throw new Error('Authentication required. Please log in to continue.');
         }
+        
+        const response = await fetch(`${API_BASE_URL}/cart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            product_id: product.id,
+            quantity: quantity
+          }),
+        });
+        
+        if (!response.ok) {
+          let errorMessage = 'Failed to add item to cart';
+          
+          if (response.status === 404) {
+            errorMessage = 'Product not found. The product may have been removed or is no longer available.';
+          } else if (response.status === 401) {
+            errorMessage = 'Authentication expired. Please log in again.';
+          } else if (response.status === 400) {
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.error || errorMessage;
+            } catch {
+              errorMessage = 'Invalid request. Please check the product details and try again.';
+            }
+          } else if (response.status >= 500) {
+            errorMessage = 'Server error. Please try again later.';
+          } else {
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.error || errorMessage;
+            } catch {
+              // Keep default error message
+            }
+          }
+          
+          console.error('Failed to add to database cart:', response.status, errorMessage);
+          throw new Error(errorMessage);
+        }
+        
+        const result = await response.json();
+        console.log('Item added to database cart:', result);
+        // Reload cart from database
+        await loadCart();
       } else {
         // Add to localStorage for non-logged-in users
         setCartItems(prevItems => {
@@ -166,7 +202,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
-      throw error;
+      // Re-throw with a user-friendly message if it's a generic error
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

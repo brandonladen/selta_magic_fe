@@ -2,18 +2,16 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchIcon } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { searchProducts, Product } from "@/data/products";
+import { searchProducts, Product as DataProduct } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [results, setResults] = useState<Product[]>([]);
+  const [results, setResults] = useState<DataProduct[]>([]);
   
   useEffect(() => {
     if (initialQuery) {
@@ -33,7 +31,6 @@ export default function Search() {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       
       <div className="pt-24 pb-16 px-4 flex-grow bg-gray-50">
         <div className="container mx-auto">
@@ -68,7 +65,12 @@ export default function Search() {
           {results.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {results.map(product => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={{
+                  ...product,
+                  price: product.price.toString(),
+                  original_price: product.original_price?.toString(),
+                  rating: product.rating.toString()
+                }} />
               ))}
             </div>
           ) : initialQuery ? (
@@ -86,8 +88,6 @@ export default function Search() {
           ) : null}
         </div>
       </div>
-      
-      <Footer />
     </div>
   );
 }

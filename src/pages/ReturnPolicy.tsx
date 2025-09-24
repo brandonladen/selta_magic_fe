@@ -1,13 +1,9 @@
 
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 
 export default function ReturnPolicy() {
   return (
-    <>
-      <Navbar />
-      <main className="container mx-auto px-4 py-12">
+    <main className="container mx-auto px-4 py-12 pt-24">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Return Policy</h1>
           
@@ -53,8 +49,6 @@ export default function ReturnPolicy() {
             <p>Phone: (123) 456-7890</p>
           </div>
         </div>
-      </main>
-      <Footer />
-    </>
+    </main>
   );
 }

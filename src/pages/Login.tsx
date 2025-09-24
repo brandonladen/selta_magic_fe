@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import Footer from "@/components/layout/Footer";
 import { generateSecurePassword } from "@/utils/passwordUtils";
 
 export default function Login() {

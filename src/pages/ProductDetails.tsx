@@ -2,8 +2,6 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart, Star, ArrowLeft, Check, Info } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,33 +15,71 @@ export default function ProductDetails() {
   const { toast } = useToast();
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   
   const product = getProductById(productId || "");
+  
+  // Enhanced error handling for missing products
+  if (!productId) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="text-center max-w-md">
+            <h1 className="text-2xl font-bold text-selta-deep-purple mb-4">Invalid Product URL</h1>
+            <p className="text-gray-600 mb-6">
+              The product URL is invalid or incomplete. Please check the link and try again.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Link to="/products">
+                <Button className="bg-selta-deep-purple hover:bg-selta-deep-purple/90">
+                  <ArrowLeft className="h-4 w-4 mr-2" /> Browse Products
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={() => navigate(-1)}>
+                Go Back
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <div className="flex-grow flex items-center justify-center p-4">
-          <div className="text-center">
+          <div className="text-center max-w-md">
             <h1 className="text-2xl font-bold text-selta-deep-purple mb-4">Product Not Found</h1>
             <p className="text-gray-600 mb-6">
-              The product you're looking for doesn't exist or has been removed.
+              The product you're looking for doesn't exist or may have been removed. This could happen if:
             </p>
-            <Link to="/products">
-              <Button className="bg-selta-deep-purple hover:bg-selta-deep-purple/90">
-                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Products
+            <ul className="text-left text-gray-600 mb-6 space-y-1">
+              <li>• The product has been discontinued</li>
+              <li>• The product ID is incorrect</li>
+              <li>• The product is temporarily unavailable</li>
+            </ul>
+            <div className="flex gap-3 justify-center">
+              <Link to="/products">
+                <Button className="bg-selta-deep-purple hover:bg-selta-deep-purple/90">
+                  <ArrowLeft className="h-4 w-4 mr-2" /> Browse All Products
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={() => navigate(-1)}>
+                Go Back
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
   
   const handleAddToCart = async () => {
+    if (isLoading) return;
+    
     try {
+      setIsLoading(true);
       await addToCart(product, quantity);
       toast({
         title: "Added to cart",
@@ -51,31 +87,39 @@ export default function ProductDetails() {
       });
     } catch (error) {
       console.error('Error adding to cart:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to add item to cart. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to add item to cart. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const handleBuyNow = async () => {
+    if (isLoading) return;
+    
     try {
+      setIsLoading(true);
       await addToCart(product, quantity);
       navigate("/cart");
     } catch (error) {
       console.error('Error adding to cart:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to add item to cart. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to add item to cart. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       
       <div className="pt-24 pb-16 px-4 flex-grow bg-gray-50">
         <div className="container mx-auto">
@@ -170,15 +214,15 @@ export default function ProductDetails() {
                   <Button 
                     className="flex-1 bg-selta-deep-purple hover:bg-selta-deep-purple/90 text-white"
                     onClick={handleAddToCart}
-                    disabled={product.stock_quantity === 0}
+                    disabled={product.stock_quantity === 0 || isLoading}
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
+                    {isLoading ? 'Adding...' : 'Add to Cart'}
                   </Button>
                   <Button 
                     className="flex-1 bg-selta-gold text-selta-deep-purple hover:bg-selta-gold/90 font-semibold"
                     onClick={handleBuyNow}
-                    disabled={product.stock_quantity === 0}
+                    disabled={product.stock_quantity === 0 || isLoading}
                   >
                     Buy Now
                   </Button>
@@ -330,8 +374,6 @@ export default function ProductDetails() {
           </div>
         </div>
       </div>
-      
-      <Footer />
     </div>
   );
 }

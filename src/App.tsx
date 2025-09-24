@@ -18,6 +18,7 @@ import ReturnPolicy from './pages/ReturnPolicy';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminCategories from './pages/admin/Categories';
+import AdminCarousel from './pages/admin/Carousel';
 import AdminUsers from './pages/admin/Users';
 import AdminDelivery from './pages/admin/Delivery';
 import AdminChats from './pages/admin/Chats';
@@ -75,6 +76,7 @@ function App() {
               <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Login />} />
               <Route path="/admin/products" element={isAdmin ? <AdminProducts /> : <Login />} />
               <Route path="/admin/categories" element={isAdmin ? <AdminCategories /> : <Login />} />
+              <Route path="/admin/carousel" element={isAdmin ? <AdminCarousel /> : <Login />} />
               <Route path="/admin/users" element={isAdmin ? <AdminUsers /> : <Login />} />
               <Route path="/admin/delivery" element={isAdmin ? <AdminDelivery /> : <Login />} />
               <Route path="/admin/chats" element={isAdmin ? <AdminChats /> : <Login />} />
