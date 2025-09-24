@@ -45,6 +45,47 @@ function ScrollToTop() {
   return null;
 }
 
+// ConditionalFooter component to only show footer on non-admin pages
+function ConditionalFooter() {
+  const { pathname } = useLocation();
+  const isAdminPage = pathname.startsWith('/admin');
+  
+  if (isAdminPage) {
+    return null;
+  }
+  
+  return <Footer />;
+}
+
+// ConditionalNavbar component to only show navbar on non-admin pages
+function ConditionalNavbar() {
+  const { pathname } = useLocation();
+  const isAdminPage = pathname.startsWith('/admin');
+  
+  if (isAdminPage) {
+    return null;
+  }
+  
+  return <Navbar />;
+}
+
+// ConditionalChatWidgets component to only show chat widgets on non-admin pages
+function ConditionalChatWidgets() {
+  const { pathname } = useLocation();
+  const isAdminPage = pathname.startsWith('/admin');
+  
+  if (isAdminPage) {
+    return null;
+  }
+  
+  return (
+    <>
+      <ChatWidget key="chat-widget-component" />
+      <WhatsAppButton key="whatsapp-button-component" />
+    </>
+  );
+}
+
 function App() {
   const { isAdmin } = useAuth();
   
@@ -57,7 +98,7 @@ function App() {
       <StripeProvider>
         <ScrollToTop />
         <div className="flex flex-col min-h-screen">
-          <Navbar />
+          <ConditionalNavbar />
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Index />} />
@@ -88,10 +129,8 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-          <Footer />
-          {/* Ensure unique key props for these components */}
-          <ChatWidget key="chat-widget-component" />
-          <WhatsAppButton key="whatsapp-button-component" />
+          <ConditionalFooter />
+          <ConditionalChatWidgets />
           <Toaster />
         </div>
       </StripeProvider>

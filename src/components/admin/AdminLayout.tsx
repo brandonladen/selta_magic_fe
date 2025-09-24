@@ -59,7 +59,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen bg-gray-100 flex w-full overflow-hidden relative">
+      <div className="h-screen bg-gray-100 flex w-full overflow-hidden relative">
         {/* Sidebar with fixed positioning and higher z-index */}
         <div className="z-30 h-screen sticky top-0 left-0 admin-sidebar">
           <Sidebar>
