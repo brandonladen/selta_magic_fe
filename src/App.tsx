@@ -15,10 +15,12 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import ShippingPolicy from './pages/ShippingPolicy';
 import ReturnPolicy from './pages/ReturnPolicy';
+import Testimonials from './pages/Testimonials';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminCategories from './pages/admin/Categories';
 import AdminCarousel from './pages/admin/Carousel';
+import AdminTestimonials from './pages/admin/Testimonials';
 import AdminUsers from './pages/admin/Users';
 import AdminDelivery from './pages/admin/Delivery';
 import AdminChats from './pages/admin/Chats';
@@ -63,6 +65,7 @@ function App() {
               <Route path="/products/:id" element={<ProductDetails />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/testimonials" element={<Testimonials />} />
               <Route path="/search" element={<Search />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<Orders />} />
@@ -77,6 +80,7 @@ function App() {
               <Route path="/admin/products" element={isAdmin ? <AdminProducts /> : <Login />} />
               <Route path="/admin/categories" element={isAdmin ? <AdminCategories /> : <Login />} />
               <Route path="/admin/carousel" element={isAdmin ? <AdminCarousel /> : <Login />} />
+              <Route path="/admin/testimonials" element={isAdmin ? <AdminTestimonials /> : <Login />} />
               <Route path="/admin/users" element={isAdmin ? <AdminUsers /> : <Login />} />
               <Route path="/admin/delivery" element={isAdmin ? <AdminDelivery /> : <Login />} />
               <Route path="/admin/chats" element={isAdmin ? <AdminChats /> : <Login />} />

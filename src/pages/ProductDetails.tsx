@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
 import { resolveImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
+import ProductTestimonials from "@/components/testimonials/ProductTestimonials";
 
 // Product type that matches our database schema
 type Product = {
@@ -307,7 +308,8 @@ export default function ProductDetails() {
               <TabsList className="mb-6">
                 <TabsTrigger value="description">Description</TabsTrigger>
                 <TabsTrigger value="specifications">Specifications</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="reviews">Customer Reviews</TabsTrigger>
+                <TabsTrigger value="testimonials">Product Reviews</TabsTrigger>
               </TabsList>
               
               <TabsContent value="description" className="text-gray-700">
@@ -424,6 +426,13 @@ export default function ProductDetails() {
                     </div>
                   </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="testimonials">
+                <ProductTestimonials 
+                  productId={product.id} 
+                  productName={product.name}
+                />
               </TabsContent>
             </Tabs>
           </div>

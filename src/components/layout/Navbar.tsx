@@ -51,6 +51,9 @@ export default function Navbar({ className }: NavbarProps) {
             <Link to="/about" className={cn("text-sm font-medium transition-colors hover:text-gray-600", location.pathname === "/about" ? "text-gray-900" : "text-gray-500")}>
               About
             </Link>
+            <Link to="/testimonials" className={cn("text-sm font-medium transition-colors hover:text-gray-600", location.pathname === "/testimonials" ? "text-gray-900" : "text-gray-500")}>
+              Reviews
+            </Link>
             <Link to="/contact" className={cn("text-sm font-medium transition-colors hover:text-gray-600", location.pathname === "/contact" ? "text-gray-900" : "text-gray-500")}>
               Contact
             </Link>
@@ -145,6 +148,9 @@ export default function Navbar({ className }: NavbarProps) {
                   )}
                   <Link to="/about" className={cn("text-sm font-medium transition-colors hover:text-gray-600", location.pathname === "/about" ? "text-gray-900" : "text-gray-500")} onClick={closeMenu}>
                     About
+                  </Link>
+                  <Link to="/testimonials" className={cn("text-sm font-medium transition-colors hover:text-gray-600", location.pathname === "/testimonials" ? "text-gray-900" : "text-gray-500")} onClick={closeMenu}>
+                    Reviews
                   </Link>
                   <Link to="/contact" className={cn("text-sm font-medium transition-colors hover:text-gray-600", location.pathname === "/contact" ? "text-gray-900" : "text-gray-500")} onClick={closeMenu}>
                     Contact
