@@ -52,7 +52,11 @@ export default function ProductDetails() {
         setProduct(result.data);
       } catch (error) {
         console.error('Error fetching product:', error);
-        toast.error('Failed to fetch product details');
+        toast({
+          title: "Error",
+          description: "Failed to fetch product details",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -357,7 +361,7 @@ export default function ProductDetails() {
                     <div className="flex items-center mb-4">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={20} className={i < Math.floor(product.rating) ? "text-selta-gold fill-selta-gold" : "text-gray-300"} />
+                          <Star key={i} size={20} className={i < Math.floor(parseFloat(product.rating || '0')) ? "text-selta-gold fill-selta-gold" : "text-gray-300"} />
                         ))}
                       </div>
                       <span className="ml-2 text-gray-700">
