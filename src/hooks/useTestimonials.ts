@@ -9,9 +9,11 @@ export const useTestimonials = (filters?: TestimonialFilters) => {
 
   const loadTestimonials = useCallback(() => {
     try {
+      console.log('Loading testimonials with filters:', filters);
       setLoading(true);
       setError(null);
       const data = testimonialService.getApprovedTestimonials(filters);
+      console.log('Loaded testimonials data:', data);
       setTestimonials(data);
     } catch (err) {
       setError('Failed to load testimonials');

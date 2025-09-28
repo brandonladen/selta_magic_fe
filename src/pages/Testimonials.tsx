@@ -16,13 +16,19 @@ export default function Testimonials() {
   const [selectedRating, setSelectedRating] = useState<number | undefined>();
   const [showForm, setShowForm] = useState(false);
 
+  console.log('Testimonials component rendering...');
+
   const { testimonials, loading, refresh } = useTestimonials({
     productId: selectedProduct || undefined,
     rating: selectedRating,
     sortBy,
   });
 
+  console.log('Testimonials data:', testimonials);
+  console.log('Loading state:', loading);
+
   const stats = testimonialService.getTestimonialStats();
+  console.log('Stats:', stats);
 
   const handleFormSuccess = () => {
     setShowForm(false);
@@ -30,11 +36,24 @@ export default function Testimonials() {
   };
 
   if (loading) {
+    console.log('Showing loading state...');
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-selta-deep-purple mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading testimonials...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Add error handling
+  if (!testimonials && !loading) {
+    console.log('No testimonials and not loading, showing error state...');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-600">Error loading testimonials</p>
         </div>
       </div>
     );
@@ -43,7 +62,7 @@ export default function Testimonials() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-selta-deep-purple to-purple-700 text-white py-16">
+      <div className="bg-gradient-to-r from-purple-900 to-purple-700 text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Customer Testimonials</h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
@@ -54,28 +73,28 @@ export default function Testimonials() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             <Card className="bg-white/10 border-white/20">
               <CardContent className="p-4 text-center">
-                <Users className="h-8 w-8 mx-auto mb-2 text-selta-gold" />
+                <Users className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
                 <div className="text-2xl font-bold">{stats.approved}</div>
                 <div className="text-sm opacity-90">Happy Customers</div>
               </CardContent>
             </Card>
             <Card className="bg-white/10 border-white/20">
               <CardContent className="p-4 text-center">
-                <Star className="h-8 w-8 mx-auto mb-2 text-selta-gold" />
+                <Star className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
                 <div className="text-2xl font-bold">{stats.averageRating}</div>
                 <div className="text-sm opacity-90">Average Rating</div>
               </CardContent>
             </Card>
             <Card className="bg-white/10 border-white/20">
               <CardContent className="p-4 text-center">
-                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-selta-gold" />
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
                 <div className="text-2xl font-bold">{stats.total}</div>
                 <div className="text-sm opacity-90">Total Reviews</div>
               </CardContent>
             </Card>
             <Card className="bg-white/10 border-white/20">
               <CardContent className="p-4 text-center">
-                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-selta-gold" />
+                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
                 <div className="text-2xl font-bold">
                   {stats.ratingCounts[5] || 0}
                 </div>
@@ -96,7 +115,7 @@ export default function Testimonials() {
 
             <Button 
               onClick={() => setShowForm(true)}
-              className="bg-selta-deep-purple hover:bg-selta-deep-purple/90 md:hidden"
+              className="bg-purple-900 hover:bg-purple-800 md:hidden"
             >
               <Plus className="h-4 w-4 mr-2" />
               Write Review
@@ -203,7 +222,7 @@ export default function Testimonials() {
                   </p>
                   <Button 
                     onClick={() => setShowForm(true)}
-                    className="bg-selta-deep-purple hover:bg-selta-deep-purple/90"
+                    className="bg-purple-900 hover:bg-purple-800"
                   >
                     Write the First Review
                   </Button>

@@ -39,7 +39,7 @@ export default function TestimonialCard({ testimonial, showProduct = true }: Tes
                   key={star}
                   className={`h-4 w-4 ${
                     star <= testimonial.rating
-                      ? 'text-selta-gold fill-selta-gold'
+                      ? 'text-yellow-400 fill-yellow-400'
                       : 'text-gray-300'
                   }`}
                 />
@@ -53,7 +53,7 @@ export default function TestimonialCard({ testimonial, showProduct = true }: Tes
 
           {/* Title */}
           {testimonial.title && (
-            <h3 className="font-semibold text-lg text-selta-deep-purple leading-tight">
+            <h3 className="font-semibold text-lg text-purple-900 leading-tight">
               {testimonial.title}
             </h3>
           )}
@@ -76,7 +76,7 @@ export default function TestimonialCard({ testimonial, showProduct = true }: Tes
           {/* Customer info */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-selta-deep-purple text-white rounded-full flex items-center justify-center font-medium text-sm">
+              <div className="h-10 w-10 bg-purple-900 text-white rounded-full flex items-center justify-center font-medium text-sm">
                 {getInitials(testimonial.customerName)}
               </div>
               <div>

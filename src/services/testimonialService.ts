@@ -49,11 +49,16 @@ const initialTestimonials: Testimonial[] = [
 class TestimonialService {
   private getTestimonials(): Testimonial[] {
     try {
+      console.log('Getting testimonials from localStorage...');
       const stored = localStorage.getItem(TESTIMONIALS_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        console.log('Found stored testimonials:', stored);
+        const parsed = JSON.parse(stored);
+        console.log('Parsed testimonials:', parsed);
+        return parsed;
       }
       // Initialize with sample data if none exists
+      console.log('No stored testimonials found, using initial data');
       this.saveTestimonials(initialTestimonials);
       return initialTestimonials;
     } catch (error) {
@@ -113,7 +118,10 @@ class TestimonialService {
 
   // Get approved testimonials only (for public display)
   getApprovedTestimonials(filters?: Omit<TestimonialFilters, 'isApproved'>): Testimonial[] {
-    return this.getAllTestimonials({ ...filters, isApproved: true });
+    console.log('Getting approved testimonials with filters:', filters);
+    const result = this.getAllTestimonials({ ...filters, isApproved: true });
+    console.log('Approved testimonials result:', result);
+    return result;
   }
 
   // Get testimonials for a specific product
