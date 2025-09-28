@@ -135,12 +135,12 @@ export default function Testimonials() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Product</label>
-                    <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                    <Select value={selectedProduct || "all"} onValueChange={(value) => setSelectedProduct(value === "all" ? "" : value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="All Products" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Products</SelectItem>
+                        <SelectItem value="all">All Products</SelectItem>
                         {products.map((product) => (
                           <SelectItem key={product.id} value={product.id}>
                             {product.name}
@@ -153,14 +153,14 @@ export default function Testimonials() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">Rating</label>
                     <Select 
-                      value={selectedRating?.toString() || ''} 
-                      onValueChange={(value) => setSelectedRating(value ? parseInt(value) : undefined)}
+                      value={selectedRating?.toString() || 'all'} 
+                      onValueChange={(value) => setSelectedRating(value === 'all' ? undefined : parseInt(value))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="All Ratings" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Ratings</SelectItem>
+                        <SelectItem value="all">All Ratings</SelectItem>
                         <SelectItem value="5">5 Stars</SelectItem>
                         <SelectItem value="4">4 Stars</SelectItem>
                         <SelectItem value="3">3 Stars</SelectItem>
