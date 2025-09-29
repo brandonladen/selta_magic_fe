@@ -33,6 +33,11 @@ import Footer from './components/layout/Footer';
 import StripeProvider from './components/stripe/StripeProvider';
 import "./App.css";
 
+// Import test utility for development (check if localhost)
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+  import('./utils/testEnvironment').catch(console.warn);
+}
+
 // ScrollToTop component to ensure page scrolls to top on route change
 function ScrollToTop() {
   const { pathname } = useLocation();

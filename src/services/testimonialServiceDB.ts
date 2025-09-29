@@ -1,9 +1,29 @@
 import { Testimonial, TestimonialFormData, TestimonialFilters } from '@/types/testimonial';
-import { TestimonialAPI } from '@/api/testimonials';
+
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
+// Only import TestimonialAPI in Node.js environment
+let TestimonialAPI: any = null;
+if (!isBrowser) {
+  try {
+    TestimonialAPI = require('@/api/testimonials').TestimonialAPI;
+  } catch (error) {
+    console.warn('TestimonialAPI not available:', error);
+  }
+}
 
 class TestimonialServiceDB {
+  // Helper method to check if database is available
+  private checkDatabaseAvailability() {
+    if (isBrowser || !TestimonialAPI) {
+      throw new Error('Database not available in browser environment');
+    }
+  }
   // Get all testimonials with optional filtering
   async getAllTestimonials(filters?: TestimonialFilters): Promise<Testimonial[]> {
+    this.checkDatabaseAvailability();
+
     try {
       console.log('TestimonialServiceDB.getAllTestimonials called with filters:', filters);
       
@@ -20,13 +40,14 @@ class TestimonialServiceDB {
       return testimonials;
     } catch (error) {
       console.error('TestimonialServiceDB: Error loading testimonials:', error);
-      // Fallback to empty array if database is not available
-      return [];
+      throw error;
     }
   }
 
   // Add a new testimonial
   async addTestimonial(testimonialData: TestimonialFormData): Promise<Testimonial> {
+    this.checkDatabaseAvailability();
+
     try {
       console.log('TestimonialServiceDB.addTestimonial called with data:', testimonialData);
       
@@ -42,6 +63,8 @@ class TestimonialServiceDB {
 
   // Update an existing testimonial (admin only)
   async updateTestimonial(id: string, updates: Partial<Testimonial>): Promise<Testimonial> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.updateTestimonial called:', { id, updates });
       
@@ -57,6 +80,8 @@ class TestimonialServiceDB {
 
   // Delete a testimonial (admin only)
   async deleteTestimonial(id: string): Promise<void> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.deleteTestimonial called with id:', id);
       
@@ -70,6 +95,8 @@ class TestimonialServiceDB {
 
   // Approve a testimonial (admin only)
   async approveTestimonial(id: string): Promise<Testimonial> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.approveTestimonial called with id:', id);
       
@@ -91,6 +118,8 @@ class TestimonialServiceDB {
     averageRating: number;
     ratingCounts: Record<number, number>;
   }> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.getTestimonialStats called');
       
@@ -113,6 +142,8 @@ class TestimonialServiceDB {
 
   // Get testimonial by ID
   async getTestimonialById(id: string): Promise<Testimonial | null> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.getTestimonialById called with id:', id);
       
@@ -128,6 +159,8 @@ class TestimonialServiceDB {
 
   // Get testimonials for a specific product
   async getTestimonialsByProduct(productId: string, approved: boolean = true): Promise<Testimonial[]> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.getTestimonialsByProduct called:', { productId, approved });
       
@@ -147,6 +180,8 @@ class TestimonialServiceDB {
 
   // Get recent testimonials (for homepage, etc.)
   async getRecentTestimonials(limit: number = 6): Promise<Testimonial[]> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.getRecentTestimonials called with limit:', limit);
       
@@ -166,6 +201,8 @@ class TestimonialServiceDB {
 
   // Search testimonials
   async searchTestimonials(searchTerm: string, filters?: TestimonialFilters): Promise<Testimonial[]> {
+    this.checkDatabaseAvailability();
+    
     try {
       console.log('TestimonialServiceDB.searchTestimonials called:', { searchTerm, filters });
       

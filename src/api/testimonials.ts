@@ -1,7 +1,26 @@
-import pool from '@/lib/database';
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
+// Only import database pool in Node.js environment
+let pool: any = null;
+if (!isBrowser) {
+  try {
+    pool = require('@/lib/database').default;
+  } catch (error) {
+    console.warn('Database pool not available:', error);
+  }
+}
+
 import { Testimonial, TestimonialFormData } from '@/types/testimonial';
 
 export class TestimonialAPI {
+  // Helper method to check if database is available
+  private static checkDatabaseAvailability() {
+    if (isBrowser || !pool) {
+      throw new Error('Database not available in browser environment');
+    }
+  }
+
   // Get all testimonials with optional filters
   static async getAllTestimonials(filters?: {
     isApproved?: boolean;
@@ -11,6 +30,8 @@ export class TestimonialAPI {
     limit?: number;
     offset?: number;
   }): Promise<{ testimonials: Testimonial[]; total: number }> {
+    this.checkDatabaseAvailability();
+    
     try {
       let query = `
         SELECT 
@@ -131,6 +152,8 @@ export class TestimonialAPI {
 
   // Create a new testimonial
   static async createTestimonial(data: TestimonialFormData): Promise<Testimonial> {
+    this.checkDatabaseAvailability();
+    
     try {
       const query = `
         INSERT INTO testimonials (
@@ -186,6 +209,8 @@ export class TestimonialAPI {
 
   // Update testimonial (admin only)
   static async updateTestimonial(id: string, updates: Partial<Testimonial>): Promise<Testimonial> {
+    this.checkDatabaseAvailability();
+    
     try {
       const setClause: string[] = [];
       const params: any[] = [];
@@ -275,6 +300,8 @@ export class TestimonialAPI {
 
   // Delete testimonial (admin only)
   static async deleteTestimonial(id: string): Promise<void> {
+    this.checkDatabaseAvailability();
+    
     try {
       const query = 'DELETE FROM testimonials WHERE id = $1';
       const result = await pool.query(query, [id]);
@@ -296,6 +323,8 @@ export class TestimonialAPI {
     averageRating: number;
     ratingCounts: Record<number, number>;
   }> {
+    this.checkDatabaseAvailability();
+    
     try {
       // Get basic counts
       const countQuery = `
@@ -350,6 +379,8 @@ export class TestimonialAPI {
 
   // Get testimonial by ID
   static async getTestimonialById(id: string): Promise<Testimonial | null> {
+    this.checkDatabaseAvailability();
+    
     try {
       const query = `
         SELECT 
