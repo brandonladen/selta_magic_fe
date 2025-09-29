@@ -9,6 +9,7 @@ import TestimonialForm from '@/components/testimonials/TestimonialForm';
 import { useTestimonials } from '@/hooks/useTestimonials';
 import { testimonialService } from '@/services/testimonialService';
 import { products } from '@/data/products';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Testimonials() {
   const [selectedProduct, setSelectedProduct] = useState<string>('');
@@ -30,9 +31,20 @@ export default function Testimonials() {
   const stats = testimonialService.getTestimonialStats();
   console.log('Stats:', stats);
 
+  const { user } = useAuth();
+
   const handleFormSuccess = () => {
     setShowForm(false);
     refresh();
+  };
+
+  const handleWriteReviewClick = () => {
+    if (!user) {
+      // Redirect to login page with a return URL
+      window.location.href = `/login?returnTo=${encodeURIComponent('/testimonials')}`;
+      return;
+    }
+    setShowForm(true);
   };
 
   if (loading) {
@@ -110,15 +122,25 @@ export default function Testimonials() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <TabsList className="mb-4 md:mb-0">
               <TabsTrigger value="reviews">View Reviews</TabsTrigger>
-              <TabsTrigger value="write">Write a Review</TabsTrigger>
+              <TabsTrigger 
+                value="write" 
+                onClick={(e) => {
+                  if (!user) {
+                    e.preventDefault();
+                    window.location.href = `/login?returnTo=${encodeURIComponent('/testimonials')}`;
+                  }
+                }}
+              >
+                {user ? 'Write a Review' : 'Login to Review'}
+              </TabsTrigger>
             </TabsList>
 
             <Button 
-              onClick={() => setShowForm(true)}
+              onClick={handleWriteReviewClick}
               className="bg-purple-900 hover:bg-purple-800 md:hidden"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Write Review
+              {user ? 'Write Review' : 'Login to Review'}
             </Button>
           </div>
 
