@@ -31,7 +31,7 @@ export default function AdminTestimonials() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending'>('all');
-  const [ratingFilter, setRatingFilter] = useState<string>('');
+  const [ratingFilter, setRatingFilter] = useState<string>('all');
   const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -40,7 +40,7 @@ export default function AdminTestimonials() {
 
   const filters = {
     isApproved: statusFilter === 'all' ? undefined : statusFilter === 'approved',
-    rating: ratingFilter ? parseInt(ratingFilter) : undefined,
+    rating: ratingFilter && ratingFilter !== 'all' ? parseInt(ratingFilter) : undefined,
     sortBy: 'newest' as const,
   };
   
@@ -344,7 +344,7 @@ export default function AdminTestimonials() {
                 <SelectValue placeholder="Rating" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Ratings</SelectItem>
+                <SelectItem value="all">All Ratings</SelectItem>
                 <SelectItem value="5">5 Stars</SelectItem>
                 <SelectItem value="4">4 Stars</SelectItem>
                 <SelectItem value="3">3 Stars</SelectItem>
@@ -358,7 +358,7 @@ export default function AdminTestimonials() {
               onClick={() => {
                 setSearchTerm('');
                 setStatusFilter('all');
-                setRatingFilter('');
+                setRatingFilter('all');
               }}
             >
               Clear Filters
@@ -609,7 +609,7 @@ export default function AdminTestimonials() {
               <div>
                 <Label htmlFor="edit-rating">Rating</Label>
                 <Select 
-                  value={editForm.rating?.toString() || ''} 
+                  value={editForm.rating?.toString() || '5'} 
                   onValueChange={(value) => setEditForm(prev => ({ ...prev, rating: parseInt(value) }))}
                 >
                   <SelectTrigger>
