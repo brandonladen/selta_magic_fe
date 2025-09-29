@@ -20,11 +20,13 @@ import {
   TrendingUp,
   Clock,
   Search,
-  Filter
+  Filter,
+  RefreshCw
 } from 'lucide-react';
 import { useAdminTestimonials } from '@/hooks/useTestimonials';
 import { useToast } from '@/hooks/use-toast';
 import { Testimonial } from '@/types/testimonial';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function AdminTestimonials() {
   console.log('AdminTestimonials component rendering...');
@@ -46,13 +48,20 @@ export default function AdminTestimonials() {
   
   console.log('AdminTestimonials filters:', filters);
 
+  const [stats, setStats] = useState<any>({
+    total: 0,
+    approved: 0,
+    pending: 0,
+    averageRating: 0,
+    ratingCounts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+  });
+
   let testimonials: Testimonial[] = [];
   let loading = true;
   let approveTestimonial: any;
   let deleteTestimonial: any;
   let updateTestimonial: any;
   let getStats: any;
-  let stats: any;
   
   try {
     console.log('Calling useAdminTestimonials hook...');
@@ -65,14 +74,28 @@ export default function AdminTestimonials() {
     deleteTestimonial = hookResult.deleteTestimonial;
     updateTestimonial = hookResult.updateTestimonial;
     getStats = hookResult.getStats;
-    
-    console.log('Getting stats...');
-    stats = getStats();
-    console.log('Stats result:', stats);
   } catch (error) {
     console.error('Error in useAdminTestimonials:', error);
     setComponentError(`Hook error: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+
+  // Load stats when component mounts or testimonials change
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        console.log('Loading stats...');
+        const statsResult = await getStats();
+        console.log('Stats result:', statsResult);
+        setStats(statsResult);
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    };
+
+    if (getStats && !loading) {
+      loadStats();
+    }
+  }, [getStats, loading, testimonials]);
   
   const { toast } = useToast();
 
@@ -248,147 +271,160 @@ export default function AdminTestimonials() {
   console.log('Rendering AdminTestimonials main content');
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-selta-deep-purple mb-2">Testimonial Management</h1>
-        <p className="text-gray-600">Manage customer reviews and testimonials</p>
-        <div className="mt-2 text-sm text-gray-500">
-          Debug Info: {testimonials?.length || 0} testimonials loaded, {filteredTestimonials?.length || 0} after filtering
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <MessageSquare className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Reviews</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-              </div>
+    <AdminLayout title="Testimonial Management">
+      <div className="space-y-6">
+        {/* Header with actions */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-gray-600">Manage customer reviews and testimonials</p>
+            <div className="mt-1 text-sm text-gray-500">
+              {testimonials?.length || 0} testimonials loaded, {filteredTestimonials?.length || 0} after filtering
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Check className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.approved}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Clock className="h-8 w-8 text-orange-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Star className="h-8 w-8 text-yellow-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avg Rating</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.averageRating}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search testimonials..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={ratingFilter} onValueChange={setRatingFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Rating" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Ratings</SelectItem>
-                <SelectItem value="5">5 Stars</SelectItem>
-                <SelectItem value="4">4 Stars</SelectItem>
-                <SelectItem value="3">3 Stars</SelectItem>
-                <SelectItem value="2">2 Stars</SelectItem>
-                <SelectItem value="1">1 Star</SelectItem>
-              </SelectContent>
-            </Select>
-
+          </div>
+          <div className="mt-4 sm:mt-0">
             <Button 
               variant="outline" 
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('all');
-                setRatingFilter('all');
-              }}
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-2"
             >
-              Clear Filters
+              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Testimonials Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Testimonials ({filteredTestimonials.length})</CardTitle>
-          <CardDescription>
-            Manage and moderate customer testimonials
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <MessageSquare className="h-8 w-8 text-blue-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Reviews</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats?.total || 0}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Check className="h-8 w-8 text-green-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Approved</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats?.approved || 0}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Clock className="h-8 w-8 text-orange-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats?.pending || 0}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Star className="h-8 w-8 text-yellow-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Avg Rating</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats?.averageRating?.toFixed(1) || '0.0'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filters
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search testimonials..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Ratings</SelectItem>
+                  <SelectItem value="5">5 Stars</SelectItem>
+                  <SelectItem value="4">4 Stars</SelectItem>
+                  <SelectItem value="3">3 Stars</SelectItem>
+                  <SelectItem value="2">2 Stars</SelectItem>
+                  <SelectItem value="1">1 Star</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('all');
+                  setRatingFilter('all');
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Testimonials Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Testimonials ({filteredTestimonials.length})</CardTitle>
+            <CardDescription>
+              Manage and moderate customer testimonials
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Rating</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
               <TableBody>
                 {filteredTestimonials.map((testimonial) => (
                   <TableRow key={testimonial.id}>
@@ -471,28 +507,28 @@ export default function AdminTestimonials() {
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {filteredTestimonials.length === 0 && (
-            <div className="text-center py-8">
-              <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No testimonials found</p>
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* View Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>View Testimonial</DialogTitle>
-            <DialogDescription>
-              Full testimonial details
-            </DialogDescription>
-          </DialogHeader>
+            {filteredTestimonials.length === 0 && (
+              <div className="text-center py-8">
+                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No testimonials found</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* View Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>View Testimonial</DialogTitle>
+              <DialogDescription>
+                Full testimonial details
+              </DialogDescription>
+            </DialogHeader>
           {selectedTestimonial && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -567,15 +603,15 @@ export default function AdminTestimonials() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Testimonial</DialogTitle>
-            <DialogDescription>
-              Modify testimonial details
-            </DialogDescription>
-          </DialogHeader>
+        {/* Edit Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Testimonial</DialogTitle>
+              <DialogDescription>
+                Modify testimonial details
+              </DialogDescription>
+            </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label htmlFor="edit-name">Customer Name</Label>
@@ -651,8 +687,9 @@ export default function AdminTestimonials() {
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AdminLayout>
   );
 }
