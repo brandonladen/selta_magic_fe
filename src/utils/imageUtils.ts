@@ -1,6 +1,5 @@
 // Utility functions for handling product images consistently across the app
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+import config from '@/config/environment';
 
 /**
  * Resolves the correct image URL for a product image
@@ -9,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 export const resolveImageUrl = (imagePath: string | null | undefined): string => {
   // Return placeholder if no image path provided
   if (!imagePath || imagePath.trim() === '') {
-    return '/placeholder.svg';
+    return config.placeholderImage;
   }
 
   // If it's already a full URL (starts with http/https), return as is
@@ -17,9 +16,9 @@ export const resolveImageUrl = (imagePath: string | null | undefined): string =>
     return imagePath;
   }
 
-  // If it starts with /uploads, prepend the base URL without /api
+  // If it starts with /uploads, prepend the upload base URL
   if (imagePath.startsWith('/uploads')) {
-    return `${API_BASE_URL.replace('/api', '')}${imagePath}`;
+    return `${config.uploadUrl}${imagePath}`;
   }
 
   // If it starts with /lovable-uploads (static assets), return as is
@@ -27,9 +26,14 @@ export const resolveImageUrl = (imagePath: string | null | undefined): string =>
     return imagePath;
   }
 
-  // If it's a relative path, assume it's from uploads
+  // If it's a relative path without leading slash, assume it's from uploads
   if (!imagePath.startsWith('/')) {
-    return `${API_BASE_URL.replace('/api', '')}/uploads/${imagePath}`;
+    return `${config.uploadUrl}/uploads/${imagePath}`;
+  }
+
+  // If it starts with / but not /uploads or /lovable-uploads, try as upload path
+  if (imagePath.startsWith('/') && !imagePath.startsWith('/uploads') && !imagePath.startsWith('/lovable-uploads')) {
+    return `${config.uploadUrl}${imagePath}`;
   }
 
   // Default case - return the path as is
@@ -40,9 +44,12 @@ export const resolveImageUrl = (imagePath: string | null | undefined): string =>
  * Creates an error handler for image loading failures
  * Provides consistent fallback behavior
  */
-export const createImageErrorHandler = (fallbackSrc: string = '/placeholder.svg') => {
+export const createImageErrorHandler = (fallbackSrc: string = config.placeholderImage) => {
   return (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
+    console.error('Image failed to load:', target.src);
+    console.log('Falling back to:', fallbackSrc);
+    
     if (target.src !== fallbackSrc) {
       target.src = fallbackSrc;
     }

@@ -30,7 +30,7 @@ type Product = {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function ProductDetails() {
-  const { productId } = useParams<{ productId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addToCart } = useCart();
@@ -42,11 +42,11 @@ export default function ProductDetails() {
   // Fetch product from API
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!productId) return;
+      if (!id) return;
       
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/products/${productId}`);
+        const response = await fetch(`${API_BASE_URL}/products/${id}`);
         const result = await response.json();
 
         if (result.error) throw new Error(result.error);
@@ -64,10 +64,10 @@ export default function ProductDetails() {
     };
 
     fetchProduct();
-  }, [productId]);
+  }, [id]);
   
   // Enhanced error handling for missing products
-  if (!productId) {
+  if (!id) {
     return (
       <div className="min-h-screen flex flex-col">
         <div className="flex-grow flex items-center justify-center p-4">
