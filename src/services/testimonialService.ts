@@ -77,21 +77,30 @@ class TestimonialService {
 
   // Get all testimonials with optional filtering
   getAllTestimonials(filters?: TestimonialFilters): Testimonial[] {
+    console.log('TestimonialService.getAllTestimonials called with filters:', filters);
+    
     let testimonials = this.getTestimonials();
+    console.log('TestimonialService: Raw testimonials from storage:', testimonials);
 
     // Apply filters
     if (filters) {
+      console.log('TestimonialService: Applying filters...');
+      
       if (filters.rating) {
+        console.log('TestimonialService: Filtering by rating:', filters.rating);
         testimonials = testimonials.filter(t => t.rating === filters.rating);
       }
       if (filters.productId) {
+        console.log('TestimonialService: Filtering by productId:', filters.productId);
         testimonials = testimonials.filter(t => t.productId === filters.productId);
       }
       if (filters.isApproved !== undefined) {
+        console.log('TestimonialService: Filtering by isApproved:', filters.isApproved);
         testimonials = testimonials.filter(t => t.isApproved === filters.isApproved);
       }
 
       // Apply sorting
+      console.log('TestimonialService: Applying sorting:', filters.sortBy);
       switch (filters.sortBy) {
         case 'newest':
           testimonials.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -109,10 +118,12 @@ class TestimonialService {
           testimonials.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
     } else {
+      console.log('TestimonialService: No filters, applying default sort by newest');
       // Default sort by newest
       testimonials.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
+    console.log('TestimonialService: Final filtered testimonials:', testimonials);
     return testimonials;
   }
 
@@ -187,8 +198,13 @@ class TestimonialService {
 
   // Get testimonial statistics
   getTestimonialStats() {
+    console.log('TestimonialService.getTestimonialStats called');
+    
     const testimonials = this.getTestimonials();
+    console.log('TestimonialService: Stats - raw testimonials:', testimonials);
+    
     const approved = testimonials.filter(t => t.isApproved);
+    console.log('TestimonialService: Stats - approved testimonials:', approved);
     
     const ratingCounts = approved.reduce((acc, t) => {
       acc[t.rating] = (acc[t.rating] || 0) + 1;
@@ -199,13 +215,16 @@ class TestimonialService {
       ? approved.reduce((sum, t) => sum + t.rating, 0) / approved.length 
       : 0;
 
-    return {
+    const stats = {
       total: testimonials.length,
       approved: approved.length,
       pending: testimonials.filter(t => !t.isApproved).length,
       averageRating: Math.round(averageRating * 10) / 10,
       ratingCounts,
     };
+    
+    console.log('TestimonialService: Final stats:', stats);
+    return stats;
   }
 }
 

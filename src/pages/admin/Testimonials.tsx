@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +27,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Testimonial } from '@/types/testimonial';
 
 export default function AdminTestimonials() {
+  console.log('AdminTestimonials component rendering...');
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending'>('all');
   const [ratingFilter, setRatingFilter] = useState<string>('');
@@ -34,37 +36,80 @@ export default function AdminTestimonials() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Testimonial>>({});
+  const [componentError, setComponentError] = useState<string | null>(null);
 
   const filters = {
     isApproved: statusFilter === 'all' ? undefined : statusFilter === 'approved',
     rating: ratingFilter ? parseInt(ratingFilter) : undefined,
     sortBy: 'newest' as const,
   };
+  
+  console.log('AdminTestimonials filters:', filters);
 
-  const { testimonials, loading, approveTestimonial, deleteTestimonial, updateTestimonial, getStats } = useAdminTestimonials(filters);
+  let testimonials: Testimonial[] = [];
+  let loading = true;
+  let approveTestimonial: any;
+  let deleteTestimonial: any;
+  let updateTestimonial: any;
+  let getStats: any;
+  let stats: any;
+  
+  try {
+    console.log('Calling useAdminTestimonials hook...');
+    const hookResult = useAdminTestimonials(filters);
+    console.log('useAdminTestimonials result:', hookResult);
+    
+    testimonials = hookResult.testimonials;
+    loading = hookResult.loading;
+    approveTestimonial = hookResult.approveTestimonial;
+    deleteTestimonial = hookResult.deleteTestimonial;
+    updateTestimonial = hookResult.updateTestimonial;
+    getStats = hookResult.getStats;
+    
+    console.log('Getting stats...');
+    stats = getStats();
+    console.log('Stats result:', stats);
+  } catch (error) {
+    console.error('Error in useAdminTestimonials:', error);
+    setComponentError(`Hook error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+  
   const { toast } = useToast();
 
-  const stats = getStats();
-
-  const filteredTestimonials = testimonials.filter(testimonial => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      testimonial.customerName.toLowerCase().includes(searchLower) ||
-      testimonial.title.toLowerCase().includes(searchLower) ||
-      testimonial.message.toLowerCase().includes(searchLower) ||
-      testimonial.customerEmail.toLowerCase().includes(searchLower)
-    );
-  });
+  let filteredTestimonials: Testimonial[] = [];
+  
+  try {
+    console.log('Filtering testimonials. Total testimonials:', testimonials?.length || 0);
+    console.log('Search term:', searchTerm);
+    
+    filteredTestimonials = testimonials?.filter(testimonial => {
+      if (!searchTerm) return true;
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        testimonial.customerName.toLowerCase().includes(searchLower) ||
+        testimonial.title.toLowerCase().includes(searchLower) ||
+        testimonial.message.toLowerCase().includes(searchLower) ||
+        testimonial.customerEmail.toLowerCase().includes(searchLower)
+      );
+    }) || [];
+    
+    console.log('Filtered testimonials count:', filteredTestimonials.length);
+  } catch (error) {
+    console.error('Error filtering testimonials:', error);
+    filteredTestimonials = [];
+  }
 
   const handleApprove = async (id: string) => {
     try {
+      console.log('Approving testimonial:', id);
       await approveTestimonial(id);
+      console.log('Testimonial approved successfully');
       toast({
         title: "Success",
         description: "Testimonial approved successfully",
       });
     } catch (error) {
+      console.error('Error approving testimonial:', error);
       toast({
         title: "Error",
         description: "Failed to approve testimonial",
@@ -79,12 +124,15 @@ export default function AdminTestimonials() {
     }
 
     try {
+      console.log('Deleting testimonial:', id);
       await deleteTestimonial(id);
+      console.log('Testimonial deleted successfully');
       toast({
         title: "Success",
         description: "Testimonial deleted successfully",
       });
     } catch (error) {
+      console.error('Error deleting testimonial:', error);
       toast({
         title: "Error",
         description: "Failed to delete testimonial",
@@ -109,7 +157,9 @@ export default function AdminTestimonials() {
     if (!selectedTestimonial) return;
 
     try {
+      console.log('Updating testimonial:', selectedTestimonial.id, editForm);
       await updateTestimonial(selectedTestimonial.id, editForm);
+      console.log('Testimonial updated successfully');
       setIsEditDialogOpen(false);
       setSelectedTestimonial(null);
       setEditForm({});
@@ -118,6 +168,7 @@ export default function AdminTestimonials() {
         description: "Testimonial updated successfully",
       });
     } catch (error) {
+      console.error('Error updating testimonial:', error);
       toast({
         title: "Error",
         description: "Failed to update testimonial",
@@ -141,22 +192,69 @@ export default function AdminTestimonials() {
     });
   };
 
+  // Add component lifecycle logging
+  useEffect(() => {
+    console.log('AdminTestimonials component mounted');
+    return () => {
+      console.log('AdminTestimonials component unmounting');
+    };
+  }, []);
+  
+  useEffect(() => {
+    console.log('AdminTestimonials state changed:', {
+      loading,
+      testimonialsCount: testimonials?.length || 0,
+      componentError,
+      stats
+    });
+  }, [loading, testimonials, componentError, stats]);
+  
+  // Show component error if any
+  if (componentError) {
+    console.error('Component error detected:', componentError);
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h2 className="text-red-800 text-lg font-semibold mb-2">Component Error</h2>
+          <p className="text-red-700">{componentError}</p>
+          <button 
+            onClick={() => {
+              console.log('Retrying component...');
+              setComponentError(null);
+              window.location.reload();
+            }}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   if (loading) {
+    console.log('Showing loading state');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-selta-deep-purple mx-auto mb-4"></div>
           <p className="text-gray-600">Loading testimonials...</p>
+          <p className="text-sm text-gray-500 mt-2">Check console for debugging info</p>
         </div>
       </div>
     );
   }
 
+  console.log('Rendering AdminTestimonials main content');
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-selta-deep-purple mb-2">Testimonial Management</h1>
         <p className="text-gray-600">Manage customer reviews and testimonials</p>
+        <div className="mt-2 text-sm text-gray-500">
+          Debug Info: {testimonials?.length || 0} testimonials loaded, {filteredTestimonials?.length || 0} after filtering
+        </div>
       </div>
 
       {/* Stats Cards */}

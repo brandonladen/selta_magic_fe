@@ -53,20 +53,25 @@ export const useTestimonials = (filters?: TestimonialFilters) => {
 
 // Hook for admin testimonial management
 export const useAdminTestimonials = (filters?: TestimonialFilters) => {
+  console.log('useAdminTestimonials hook called with filters:', filters);
+  
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadTestimonials = useCallback(() => {
     try {
+      console.log('useAdminTestimonials: Loading testimonials...');
       setLoading(true);
       setError(null);
       const data = testimonialService.getAllTestimonials(filters);
+      console.log('useAdminTestimonials: Loaded data:', data);
       setTestimonials(data);
     } catch (err) {
+      console.error('useAdminTestimonials: Error loading testimonials:', err);
       setError('Failed to load testimonials');
-      console.error('Error loading testimonials:', err);
     } finally {
+      console.log('useAdminTestimonials: Setting loading to false');
       setLoading(false);
     }
   }, [filters]);
