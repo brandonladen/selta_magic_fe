@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,15 +19,19 @@ export default function Testimonials() {
 
   console.log('Testimonials component rendering...');
 
-  const { testimonials, loading, refresh } = useTestimonials({
+  // Memoize filters to prevent infinite re-renders
+  const filters = useMemo(() => ({
     productId: selectedProduct || undefined,
     rating: selectedRating,
     sortBy,
-  });
+  }), [selectedProduct, selectedRating, sortBy]);
+
+  const { testimonials, loading, error, addTestimonial, refresh } = useTestimonials(filters);
 
   console.log('Testimonials data:', testimonials);
   console.log('Loading state:', loading);
 
+  // Get stats synchronously from localStorage service (always available)
   const stats = testimonialService.getTestimonialStats();
   console.log('Stats:', stats);
 
@@ -60,12 +64,18 @@ export default function Testimonials() {
   }
 
   // Add error handling
-  if (!testimonials && !loading) {
-    console.log('No testimonials and not loading, showing error state...');
+  if (error) {
+    console.log('Error state detected:', error);
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-red-600">Error loading testimonials</p>
+          <p className="text-red-600 mb-4">Error loading testimonials: {error}</p>
+          <button 
+            onClick={refresh}
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
