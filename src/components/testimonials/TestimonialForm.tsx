@@ -23,7 +23,7 @@ export default function TestimonialForm({ productId, onSuccess }: TestimonialFor
     rating: 5,
     title: '',
     message: '',
-    productId: productId || '',
+    productId: productId || 'general',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -60,11 +60,15 @@ export default function TestimonialForm({ productId, onSuccess }: TestimonialFor
       
       // Add product name if productId is provided
       const submissionData = { ...formData };
-      if (formData.productId) {
+      if (formData.productId && formData.productId !== 'general') {
         const product = products.find(p => p.id === formData.productId);
         if (product) {
           submissionData.productName = product.name;
         }
+      } else if (formData.productId === 'general') {
+        // Clear productId for general reviews
+        submissionData.productId = '';
+        submissionData.productName = '';
       }
 
       await addTestimonial(submissionData);
@@ -109,7 +113,7 @@ export default function TestimonialForm({ productId, onSuccess }: TestimonialFor
                   rating: 5,
                   title: '',
                   message: '',
-                  productId: productId || '',
+                  productId: productId || 'general',
                 });
               }}
               variant="outline"
@@ -169,7 +173,7 @@ export default function TestimonialForm({ productId, onSuccess }: TestimonialFor
                   <SelectValue placeholder="Select a product you'd like to review" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">General Review</SelectItem>
+                  <SelectItem value="general">General Review</SelectItem>
                   {products.map((product) => (
                     <SelectItem key={product.id} value={product.id}>
                       {product.name}
