@@ -124,31 +124,66 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Add loading timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Admin testimonials loading timeout - forcing fallback to localStorage');
+        setLoading(false);
+        try {
+          const data = testimonialService.getAllTestimonials(filters);
+          setTestimonials(data);
+        } catch (err) {
+          setError('Failed to load testimonials after timeout');
+          setTestimonials([]);
+        }
+      }
+    }, 5000); // 5 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [loading, filters]);
+
   const loadTestimonials = useCallback(async () => {
     try {
       console.log('useAdminTestimonials: Loading testimonials...');
       setLoading(true);
       setError(null);
       
-      // Try database first, fallback to localStorage
-      try {
-        const data = await testimonialServiceDB.getAllTestimonials(filters);
-        console.log('useAdminTestimonials: Loaded data from database:', data);
-        setTestimonials(data);
-      } catch (dbError) {
-        console.warn('Database not available, using localStorage:', dbError);
+      // For browser environment, use localStorage directly
+      const isBrowser = typeof window !== 'undefined';
+      
+      if (isBrowser) {
+        console.log('Browser environment detected, using localStorage for admin testimonials');
         const data = testimonialService.getAllTestimonials(filters);
         console.log('useAdminTestimonials: Loaded data from localStorage:', data);
         setTestimonials(data);
+      } else {
+        // Try database in Node.js environment
+        try {
+          const data = await testimonialServiceDB.getAllTestimonials(filters);
+          console.log('useAdminTestimonials: Loaded data from database:', data);
+          setTestimonials(data);
+        } catch (dbError) {
+          console.warn('Database not available, using localStorage:', dbError);
+          const data = testimonialService.getAllTestimonials(filters);
+          console.log('useAdminTestimonials: Loaded data from localStorage:', data);
+          setTestimonials(data);
+        }
       }
     } catch (err) {
       console.error('useAdminTestimonials: Error loading testimonials:', err);
       setError('Failed to load testimonials');
+      setTestimonials([]); // Set empty array to prevent infinite loading
     } finally {
       console.log('useAdminTestimonials: Setting loading to false');
       setLoading(false);
     }
-  }, [filters]);
+  }, [
+    filters?.isApproved,
+    filters?.productId,
+    filters?.rating,
+    filters?.sortBy
+  ]);
 
   useEffect(() => {
     loadTestimonials();
@@ -156,18 +191,30 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
 
   const approveTestimonial = async (id: string): Promise<boolean> => {
     try {
-      // Try database first, fallback to localStorage
-      try {
-        await testimonialServiceDB.approveTestimonial(id);
-        loadTestimonials(); // Refresh the list
-        return true;
-      } catch (dbError) {
-        console.warn('Database not available, using localStorage:', dbError);
+      // For browser environment, use localStorage directly
+      const isBrowser = typeof window !== 'undefined';
+      
+      if (isBrowser) {
+        console.log('Browser environment detected, using localStorage for approve testimonial');
         const success = testimonialService.approveTestimonial(id);
         if (success) {
           loadTestimonials(); // Refresh the list
         }
         return success;
+      } else {
+        // Try database in Node.js environment
+        try {
+          await testimonialServiceDB.approveTestimonial(id);
+          loadTestimonials(); // Refresh the list
+          return true;
+        } catch (dbError) {
+          console.warn('Database not available, using localStorage:', dbError);
+          const success = testimonialService.approveTestimonial(id);
+          if (success) {
+            loadTestimonials(); // Refresh the list
+          }
+          return success;
+        }
       }
     } catch (err) {
       setError('Failed to approve testimonial');
@@ -177,18 +224,30 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
 
   const deleteTestimonial = async (id: string): Promise<boolean> => {
     try {
-      // Try database first, fallback to localStorage
-      try {
-        await testimonialServiceDB.deleteTestimonial(id);
-        loadTestimonials(); // Refresh the list
-        return true;
-      } catch (dbError) {
-        console.warn('Database not available, using localStorage:', dbError);
+      // For browser environment, use localStorage directly
+      const isBrowser = typeof window !== 'undefined';
+      
+      if (isBrowser) {
+        console.log('Browser environment detected, using localStorage for delete testimonial');
         const success = testimonialService.deleteTestimonial(id);
         if (success) {
           loadTestimonials(); // Refresh the list
         }
         return success;
+      } else {
+        // Try database in Node.js environment
+        try {
+          await testimonialServiceDB.deleteTestimonial(id);
+          loadTestimonials(); // Refresh the list
+          return true;
+        } catch (dbError) {
+          console.warn('Database not available, using localStorage:', dbError);
+          const success = testimonialService.deleteTestimonial(id);
+          if (success) {
+            loadTestimonials(); // Refresh the list
+          }
+          return success;
+        }
       }
     } catch (err) {
       setError('Failed to delete testimonial');
@@ -198,18 +257,30 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
 
   const updateTestimonial = async (id: string, updates: Partial<Testimonial>): Promise<Testimonial | null> => {
     try {
-      // Try database first, fallback to localStorage
-      try {
-        const updated = await testimonialServiceDB.updateTestimonial(id, updates);
-        loadTestimonials(); // Refresh the list
-        return updated;
-      } catch (dbError) {
-        console.warn('Database not available, using localStorage:', dbError);
+      // For browser environment, use localStorage directly
+      const isBrowser = typeof window !== 'undefined';
+      
+      if (isBrowser) {
+        console.log('Browser environment detected, using localStorage for update testimonial');
         const updated = testimonialService.updateTestimonial(id, updates);
         if (updated) {
           loadTestimonials(); // Refresh the list
         }
         return updated;
+      } else {
+        // Try database in Node.js environment
+        try {
+          const updated = await testimonialServiceDB.updateTestimonial(id, updates);
+          loadTestimonials(); // Refresh the list
+          return updated;
+        } catch (dbError) {
+          console.warn('Database not available, using localStorage:', dbError);
+          const updated = testimonialService.updateTestimonial(id, updates);
+          if (updated) {
+            loadTestimonials(); // Refresh the list
+          }
+          return updated;
+        }
       }
     } catch (err) {
       setError('Failed to update testimonial');
@@ -219,12 +290,20 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
 
   const getStats = async () => {
     try {
-      // Try database first, fallback to localStorage
-      try {
-        return await testimonialServiceDB.getTestimonialStats();
-      } catch (dbError) {
-        console.warn('Database not available, using localStorage:', dbError);
+      // For browser environment, use localStorage directly
+      const isBrowser = typeof window !== 'undefined';
+      
+      if (isBrowser) {
+        console.log('Browser environment detected, using localStorage for get stats');
         return testimonialService.getTestimonialStats();
+      } else {
+        // Try database in Node.js environment
+        try {
+          return await testimonialServiceDB.getTestimonialStats();
+        } catch (dbError) {
+          console.warn('Database not available, using localStorage:', dbError);
+          return testimonialService.getTestimonialStats();
+        }
       }
     } catch (err) {
       console.error('Error getting stats:', err);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,11 +40,12 @@ export default function AdminTestimonials() {
   const [editForm, setEditForm] = useState<Partial<Testimonial>>({});
   const [componentError, setComponentError] = useState<string | null>(null);
 
-  const filters = {
+  // Memoize filters to prevent infinite re-renders
+  const filters = useMemo(() => ({
     isApproved: statusFilter === 'all' ? undefined : statusFilter === 'approved',
     rating: ratingFilter && ratingFilter !== 'all' ? parseInt(ratingFilter) : undefined,
     sortBy: 'newest' as const,
-  };
+  }), [statusFilter, ratingFilter]);
   
   console.log('AdminTestimonials filters:', filters);
 
