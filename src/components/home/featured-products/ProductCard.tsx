@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingCart, Heart, Star } from "lucide-react";
+import { Eye, Heart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -22,11 +22,10 @@ export default function ProductCard({ product, variants }: ProductCardProps) {
     navigate(`/products/${product.id}`);
   };
 
-  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
+  const handleViewMore = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log(`Add to cart clicked for product ${productId}`);
-    // Additional cart logic can be added here
-    navigate(`/products/${productId}`);
+    console.log('View more clicked - navigating to products page');
+    navigate('/products');
   };
 
   return (
@@ -83,12 +82,12 @@ export default function ProductCard({ product, variants }: ProductCardProps) {
           </p>
           
           <div className="flex space-x-2">
-            <Button 
+            <Button
               className="bg-selta-deep-purple hover:bg-selta-deep-purple/90 text-white flex-1 rounded-full font-medium"
               size="sm"
-              onClick={(e) => handleAddToCart(e, product.id)}
+              onClick={handleViewMore}
             >
-              <ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart
+              <Eye className="h-4 w-4 mr-2" /> View More
             </Button>
             <Button 
               variant="outline" 
