@@ -127,8 +127,7 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
 
       const response = await fetch(url, {
         headers: {
-          // Add authorization header if needed for admin endpoints
-          // 'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -170,7 +169,7 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${token}`, // Add auth token if needed
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({ status: 'approved' }),
       });
@@ -193,7 +192,7 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
       const response = await fetch(url, {
         method: 'DELETE',
         headers: {
-          // 'Authorization': `Bearer ${token}`, // Add auth token if needed
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -216,7 +215,7 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${token}`, // Add auth token if needed
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify(updates),
       });
@@ -239,7 +238,7 @@ export const useAdminTestimonials = (filters?: TestimonialFilters) => {
       const url = `${config.apiBaseUrl}/admin/testimonials/dashboard`;
       const response = await fetch(url, {
         headers: {
-          // 'Authorization': `Bearer ${token}`, // Add auth token if needed
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
