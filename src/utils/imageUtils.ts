@@ -16,9 +16,11 @@ export const resolveImageUrl = (imagePath: string | null | undefined): string =>
     return imagePath;
   }
 
-  // If it starts with /uploads, prepend the upload base URL
+  // If it starts with /uploads, prepend the base URL from API config
   if (imagePath.startsWith('/uploads')) {
-    return `${config.uploadUrl}${imagePath}`;
+    // Use the API base URL but remove '/api' to get the base domain
+    const baseUrl = config.apiBaseUrl.replace('/api', '');
+    return `${baseUrl}${imagePath}`;
   }
 
   // If it starts with /lovable-uploads (static assets), return as is
@@ -28,12 +30,14 @@ export const resolveImageUrl = (imagePath: string | null | undefined): string =>
 
   // If it's a relative path without leading slash, assume it's from uploads
   if (!imagePath.startsWith('/')) {
-    return `${config.uploadUrl}/uploads/${imagePath}`;
+    const baseUrl = config.apiBaseUrl.replace('/api', '');
+    return `${baseUrl}/uploads/${imagePath}`;
   }
 
   // If it starts with / but not /uploads or /lovable-uploads, try as upload path
   if (imagePath.startsWith('/') && !imagePath.startsWith('/uploads') && !imagePath.startsWith('/lovable-uploads')) {
-    return `${config.uploadUrl}${imagePath}`;
+    const baseUrl = config.apiBaseUrl.replace('/api', '');
+    return `${baseUrl}${imagePath}`;
   }
 
   // Default case - return the path as is
