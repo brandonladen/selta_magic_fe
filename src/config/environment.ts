@@ -2,8 +2,8 @@
 
 export const config = {
   // API Configuration
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api',
-  uploadUrl: import.meta.env.VITE_UPLOAD_URL || 'http://localhost:3001',
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5174/api',
+  uploadUrl: import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5174',
   
   // Development settings
   isDevelopment: import.meta.env.DEV,
